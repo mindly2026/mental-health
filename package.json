@@ -1,0 +1,58 @@
+{
+  "name": "mental-health",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.6.5",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=10.0.0"
+  },
+  "scripts": {
+    "preinstall": "npx only-allow pnpm",
+    "prepare": "husky",
+    "dev": "turbo dev",
+    "dev:local": "turbo dev --filter=!@mental-health/admin-panel",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "lint:fix": "turbo lint:fix",
+    "type-check": "turbo type-check",
+    "format": "prettier --write \"**/*.{ts,tsx,vue,js,json,css,md,yaml,yml}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,vue,js,json,css,md,yaml,yml}\""
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.20.0",
+    "@commitlint/cli": "^19.7.0",
+    "@commitlint/config-conventional": "^19.7.0",
+    "eslint": "^9.20.0",
+    "eslint-config-prettier": "^10.0.0",
+    "eslint-plugin-vue": "^9.33.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.5.0",
+    "only-allow": "^1.2.1",
+    "prettier": "^3.5.0",
+    "tsc-files": "^1.1.4",
+    "turbo": "^2.3.3",
+    "typescript": "^5.8.0",
+    "typescript-eslint": "^8.25.0",
+    "vue-eslint-parser": "^9.4.3"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix --max-warnings 0",
+      "prettier --write",
+      "tsc-files --noEmit --project tsconfig.lint.json"
+    ],
+    "*.vue": [
+      "eslint --fix --max-warnings 0",
+      "prettier --write"
+    ],
+    "*.{js,cjs,mjs}": [
+      "eslint --fix --max-warnings 0",
+      "prettier --write"
+    ],
+    "*.{json,md,yaml,yml,css}": [
+      "prettier --write"
+    ]
+  }
+}

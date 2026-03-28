@@ -1,0 +1,14 @@
+{
+  "$comment": "Root tsconfig for IDE navigation only. Not used by build or tsc directly.",
+  "files": [],
+  "references": [
+    { "path": "packages/contract" },
+    { "path": "packages/auth" },
+    { "path": "packages/db" },
+    { "path": "packages/domain" },
+    { "path": "packages/design-system" },
+    { "path": "apps/backend" },
+    { "path": "apps/client" },
+    { "path": "apps/admin-panel" }
+  ]
+}

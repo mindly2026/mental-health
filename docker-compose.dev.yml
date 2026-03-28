@@ -1,0 +1,103 @@
+name: mental-health-dev
+
+services:
+  # ── PostgreSQL ───────────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: mentalhealth
+      POSTGRES_USER: dev
+      POSTGRES_PASSWORD: devpassword
+    ports:
+      - '5433:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U dev -d mentalhealth']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ── Backend (Fastify) ────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+      target: dev
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      PORT: '3000'
+      DATABASE_URL: postgres://dev:devpassword@postgres:5432/mentalhealth
+      JWT_SECRET: dev-jwt-secret-change-in-production
+      CLIENT_URL: http://localhost:5173
+    ports:
+      - '3000:3000'
+    volumes:
+      # Hot reload: bind-mount source directories only (not node_modules)
+      - ./apps/backend/src:/app/apps/backend/src
+      - ./packages/contract/src:/app/packages/contract/src
+      - ./packages/auth/src:/app/packages/auth/src
+      - ./packages/db/src:/app/packages/db/src
+      - ./packages/domain/src:/app/packages/domain/src
+      # Protect container node_modules from host override
+      - backend_node_modules:/app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # ── Frontend (Vue / Vite) ────────────────────────────────────────────────────
+  client:
+    build:
+      context: .
+      dockerfile: apps/client/Dockerfile
+      target: dev
+    restart: unless-stopped
+    environment:
+      VITE_API_URL: http://backend:3000
+    ports:
+      - '5173:5173'
+    volumes:
+      - ./apps/client/src:/app/apps/client/src
+      - ./apps/client/index.html:/app/apps/client/index.html
+      - ./apps/client/public:/app/apps/client/public
+      - ./packages/contract/src:/app/packages/contract/src
+      - ./packages/design-system/src:/app/packages/design-system/src
+      - client_node_modules:/app/node_modules
+    depends_on:
+      - backend
+
+  # ── Admin Panel (Strapi) ──────────────────────────────────────────────────────
+  admin:
+    build:
+      context: .
+      dockerfile: apps/admin-panel/Dockerfile
+      target: dev
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      DATABASE_CLIENT: postgres
+      DATABASE_HOST: postgres
+      DATABASE_PORT: '5432'
+      DATABASE_NAME: mentalhealth
+      DATABASE_USERNAME: dev
+      DATABASE_PASSWORD: devpassword
+      JWT_SECRET: dev-strapi-jwt-secret
+      ADMIN_JWT_SECRET: dev-strapi-admin-secret
+      APP_KEYS: dev-key-1,dev-key-2
+    ports:
+      - '1337:1337'
+    volumes:
+      - ./apps/admin-panel/src:/app/apps/admin-panel/src
+      - ./apps/admin-panel/config:/app/apps/admin-panel/config
+      - admin_node_modules:/app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  backend_node_modules:
+  client_node_modules:
+  admin_node_modules:

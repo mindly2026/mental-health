@@ -1,0 +1,10 @@
+{
+  "$comment": "Loose tsconfig used by tsc-files in lint-staged for per-file staged type checking.",
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "module": "Preserve",
+    "moduleResolution": "Bundler",
+    "noEmit": true,
+    "allowImportingTsExtensions": true
+  }
+}

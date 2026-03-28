@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+.turbo/
+coverage/
+*.tsbuildinfo
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Drizzle migrations output
+drizzle/
+
+# Strapi
+apps/admin-panel/.cache/
+apps/admin-panel/.strapi/
+apps/admin-panel/build/
+apps/admin-panel/public/uploads/
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+*.log
+.vscode/settings.json
+.idea/
+
+# Docker
+*.pid
