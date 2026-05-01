@@ -11,9 +11,13 @@
     "lint:fix": "eslint src --fix"
   },
   "dependencies": {
-    "@strapi/strapi": "^5.0.0",
     "@strapi/plugin-users-permissions": "^5.0.0",
-    "better-sqlite3": "^9.6.0"
+    "@strapi/strapi": "^5.0.0",
+    "better-sqlite3": "^9.6.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-router-dom": "^6.0.0",
+    "styled-components": "^6.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

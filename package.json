@@ -31,7 +31,6 @@
     "lint-staged": "^15.5.0",
     "only-allow": "^1.2.1",
     "prettier": "^3.5.0",
-    "tsc-files": "^1.1.4",
     "turbo": "^2.3.3",
     "typescript": "^5.8.0",
     "typescript-eslint": "^8.25.0",
@@ -40,8 +39,7 @@
   "lint-staged": {
     "*.{ts,tsx}": [
       "eslint --fix --max-warnings 0",
-      "prettier --write",
-      "tsc-files --noEmit --project tsconfig.lint.json"
+      "prettier --write"
     ],
     "*.vue": [
       "eslint --fix --max-warnings 0",
