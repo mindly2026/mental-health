@@ -51,6 +51,14 @@ export default tseslint.config(
     ...tseslint.configs.disableTypeChecked,
   },
 
+  // Storybook story files — co-located in design-system but not part of its
+  // tsconfig (no storybook types there). Disable type-aware rules so the
+  // project service is not required to parse them.
+  {
+    files: ['**/*.stories.ts'],
+    ...tseslint.configs.disableTypeChecked,
+  },
+
   // Vue files — outer parser: vue-eslint-parser, inner parser: @typescript-eslint/parser
   // Must register @typescript-eslint plugin here to use its rules
   {

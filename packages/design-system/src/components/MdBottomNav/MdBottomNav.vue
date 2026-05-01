@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { NavItem } from '../types'
+import type { NavItem } from '../../types'
 
 interface Props {
   items: NavItem[]
