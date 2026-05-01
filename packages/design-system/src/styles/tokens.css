@@ -1,0 +1,220 @@
+/*
+ * Mindly Design System — CSS Custom Properties
+ * Import once at app root: import '@mental-health/design-system/styles'
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ─────────────────────────────────────────────
+   COLOR PRIMITIVES
+   ───────────────────────────────────────────── */
+:root {
+  /* Blue scale */
+  --blue-50: #ebf5fb;
+  --blue-100: #d4e9f7;
+  --blue-200: #a8d4e8;
+  --blue-300: #7fbde0;
+  --blue-400: #5b9fd4; /* PRIMARY BLUE */
+  --blue-500: #4a8dc2;
+  --blue-600: #3a74a8;
+  --blue-700: #2c5b8c;
+  --blue-800: #1f4270;
+  --blue-900: #1b3a6e; /* NAVY */
+
+  /* Teal scale */
+  --teal-50: #eaf7f5;
+  --teal-100: #c8ede9;
+  --teal-200: #a1ddd7;
+  --teal-300: #7acec6;
+  --teal-400: #62beb0; /* PRIMARY TEAL */
+  --teal-500: #4eaa9c;
+  --teal-600: #3d9189;
+  --teal-700: #2e7870;
+  --teal-800: #205e57;
+  --teal-900: #14433e;
+
+  /* Blend / Accent */
+  --blend-300: #8acdd8;
+  --blend-400: #4bafc3; /* BLEND */
+  --blend-500: #3a9db2;
+
+  /* Neutral (cool-tinted) */
+  --neutral-0: #ffffff;
+  --neutral-50: #f5f9fd;
+  --neutral-100: #ebf0f7;
+  --neutral-200: #d6e2ee;
+  --neutral-300: #b8ccde;
+  --neutral-400: #8baec8;
+  --neutral-500: #6490b0;
+  --neutral-600: #456f90;
+  --neutral-700: #2d5070;
+  --neutral-800: #1e3856;
+  --neutral-900: #0f2040;
+
+  /* Feedback */
+  --success-light: #e6f7f2;
+  --success: #2db885;
+  --success-dark: #1a9068;
+
+  --warning-light: #fef5e7;
+  --warning: #f5a623;
+  --warning-dark: #c47d0e;
+
+  --error-light: #fdecec;
+  --error: #e05252;
+  --error-dark: #b83333;
+
+  --info-light: #ebf5fb;
+  --info: #5b9fd4;
+  --info-dark: #3a74a8;
+}
+
+/* ─────────────────────────────────────────────
+   SEMANTIC TOKENS
+   ───────────────────────────────────────────── */
+:root {
+  /* Backgrounds */
+  --color-bg: var(--neutral-50);
+  --color-surface: var(--neutral-0);
+  --color-surface-alt: var(--neutral-100);
+  --color-overlay: rgba(15, 32, 64, 0.5);
+
+  /* Text */
+  --color-text-primary: var(--blue-900);
+  --color-text-secondary: var(--neutral-600);
+  --color-text-muted: var(--neutral-400);
+  --color-text-inverse: var(--neutral-0);
+  --color-text-link: var(--blue-400);
+
+  /* Brand */
+  --color-primary: var(--blue-400);
+  --color-primary-hover: var(--blue-500);
+  --color-primary-active: var(--blue-600);
+  --color-primary-subtle: var(--blue-50);
+  --color-secondary: var(--teal-400);
+  --color-secondary-hover: var(--teal-500);
+  --color-secondary-subtle: var(--teal-50);
+  --color-accent: var(--blend-400);
+
+  /* Borders */
+  --color-border: var(--blue-200);
+  --color-border-focus: var(--blue-400);
+  --color-divider: var(--neutral-200);
+
+  /* States */
+  --color-disabled-bg: var(--neutral-100);
+  --color-disabled-text: var(--neutral-400);
+
+  /* Feedback semantic */
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+  --color-info: var(--info);
+}
+
+/* ─────────────────────────────────────────────
+   TYPOGRAPHY
+   ───────────────────────────────────────────── */
+:root {
+  --font-heading: 'Nunito', system-ui, sans-serif;
+  --font-body: 'DM Sans', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+
+  /* Size scale */
+  --text-xs: 0.75rem; /* 12px */
+  --text-sm: 0.875rem; /* 14px */
+  --text-base: 1rem; /* 16px */
+  --text-md: 1.125rem; /* 18px */
+  --text-lg: 1.375rem; /* 22px */
+  --text-xl: 1.75rem; /* 28px */
+  --text-2xl: 2.25rem; /* 36px */
+  --text-3xl: 3rem; /* 48px */
+
+  /* Line heights */
+  --leading-tight: 1.2;
+  --leading-snug: 1.35;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.7;
+
+  /* Letter spacing */
+  --tracking-tight: -0.02em;
+  --tracking-normal: 0em;
+  --tracking-wide: 0.04em;
+  --tracking-widest: 0.08em;
+
+  /* Font weights */
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --weight-extrabold: 800;
+}
+
+/* ─────────────────────────────────────────────
+   SPACING
+   ───────────────────────────────────────────── */
+:root {
+  --space-1: 0.25rem; /* 4px */
+  --space-2: 0.5rem; /* 8px */
+  --space-3: 0.75rem; /* 12px */
+  --space-4: 1rem; /* 16px */
+  --space-5: 1.25rem; /* 20px */
+  --space-6: 1.5rem; /* 24px */
+  --space-8: 2rem; /* 32px */
+  --space-10: 2.5rem; /* 40px */
+  --space-12: 3rem; /* 48px */
+  --space-16: 4rem; /* 64px */
+  --space-20: 5rem; /* 80px */
+  --space-24: 6rem; /* 96px */
+}
+
+/* ─────────────────────────────────────────────
+   BORDER RADIUS
+   ───────────────────────────────────────────── */
+:root {
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-2xl: 32px;
+  --radius-full: 9999px;
+}
+
+/* ─────────────────────────────────────────────
+   SHADOWS
+   ───────────────────────────────────────────── */
+:root {
+  --shadow-xs: 0 1px 2px rgba(27, 58, 110, 0.05);
+  --shadow-sm: 0 1px 6px rgba(27, 58, 110, 0.07);
+  --shadow-md: 0 4px 16px rgba(27, 58, 110, 0.1);
+  --shadow-lg: 0 12px 40px rgba(27, 58, 110, 0.14);
+  --shadow-xl: 0 24px 64px rgba(27, 58, 110, 0.18);
+  --shadow-inner: inset 0 2px 6px rgba(27, 58, 110, 0.08);
+}
+
+/* ─────────────────────────────────────────────
+   TRANSITIONS
+   ───────────────────────────────────────────── */
+:root {
+  --ease-entrance: cubic-bezier(0.34, 1.2, 0.64, 1);
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+
+  --duration-micro: 150ms;
+  --duration-fast: 200ms;
+  --duration-normal: 300ms;
+  --duration-slow: 450ms;
+  --duration-page: 500ms;
+}
+
+/* ─────────────────────────────────────────────
+   Z-INDEX
+   ───────────────────────────────────────────── */
+:root {
+  --z-base: 0;
+  --z-raised: 10;
+  --z-sticky: 100;
+  --z-overlay: 200;
+  --z-modal: 300;
+  --z-toast: 400;
+}
