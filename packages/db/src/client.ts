@@ -5,7 +5,7 @@ import * as schema from './schema/index'
 const connectionString =
   process.env['DATABASE_URL'] ?? 'postgres://dev:devpassword@localhost:5433/mentalhealth'
 
-const queryClient = postgres(connectionString)
+export const queryClient = postgres(connectionString)
 
 export const db = drizzle(queryClient, { schema })
 
