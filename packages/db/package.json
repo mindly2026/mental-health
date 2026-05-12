@@ -11,7 +11,8 @@
     "./schema": {
       "types": "./dist/types/schema/index.d.ts",
       "default": "./src/schema/index.ts"
-    }
+    },
+    "./testing": "./tests/mocked.ts"
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
@@ -28,8 +29,11 @@
     "postgres": "^3.4.5"
   },
   "devDependencies": {
+    "@testcontainers/postgresql": "^11.14.0",
     "dotenv-cli": "^11.0.0",
     "drizzle-kit": "^0.30.4",
-    "typescript": "^5.8.0"
+    "testcontainers": "^11.14.0",
+    "typescript": "^5.8.0",
+    "vitest": "^4.1.6"
   }
 }
