@@ -1,4 +1,4 @@
-import type { User, MoodEntry } from '../models/index.js'
+import type { MoodEntry } from '../models/index.js'
 
 // Generic API response wrapper
 export interface ApiResponse<T> {
@@ -18,15 +18,15 @@ export interface LoginRequest {
   password: string
 }
 
-export interface LoginResponse {
-  token: string
-  user: Omit<User, 'createdAt' | 'updatedAt'>
-}
-
 export interface RegisterRequest {
   email: string
   password: string
   name: string
+}
+
+export interface LoginResponse {
+  token: string
+  user: { id: string; email: string; name: string; avatarUrl: string | null }
 }
 
 // Mood

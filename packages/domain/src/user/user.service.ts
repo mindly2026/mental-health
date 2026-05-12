@@ -1,38 +1,72 @@
 import { eq } from 'drizzle-orm'
-import { db, users, type NewUser } from '@mental-health/db'
+import { db, users } from '@mental-health/db'
 import { hashPassword, comparePassword, signToken } from '@mental-health/auth'
-import type { LoginRequest, LoginResponse, RegisterRequest } from '@mental-health/contract'
+import type { LoginResponse } from '@mental-health/contract'
 
-export async function registerUser(
-  input: RegisterRequest,
-): Promise<{ id: string; email: string; name: string }> {
-  const passwordHash = await hashPassword(input.password)
-
-  const [user] = await db
-    .insert(users)
-    .values({
-      email: input.email,
-      name: input.name,
-      passwordHash,
-    } satisfies NewUser)
-    .returning({ id: users.id, email: users.email, name: users.name })
-
-  if (!user) throw new Error('Failed to create user')
-  return user
+export async function getUserById(id: string) {
+  const [user] = await db.select().from(users).where(eq(users.id, id)).limit(1)
+  return user ?? null
 }
 
-export async function loginUser(input: LoginRequest, jwtSecret: string): Promise<LoginResponse> {
-  const [user] = await db.select().from(users).where(eq(users.email, input.email)).limit(1)
+export async function getUserByEmail(email: string) {
+  const [user] = await db.select().from(users).where(eq(users.email, email)).limit(1)
+  return user ?? null
+}
 
-  if (!user) throw new Error('Invalid credentials')
+export async function registerUser(
+  email: string,
+  password: string,
+  name: string,
+  jwtSecret: string,
+): Promise<LoginResponse> {
+  const existing = await getUserByEmail(email)
+  if (existing) {
+    throw new Error('A user with this email already exists')
+  }
 
-  const valid = await comparePassword(input.password, user.passwordHash)
-  if (!valid) throw new Error('Invalid credentials')
+  const passwordHash = await hashPassword(password)
+
+  const [newUser] = await db.insert(users).values({ email, name, passwordHash }).returning()
+
+  if (!newUser) throw new Error('Failed to create user')
+
+  const token = await signToken({ sub: newUser.id, email: newUser.email }, jwtSecret)
+
+  return {
+    token,
+    user: {
+      id: newUser.id,
+      email: newUser.email,
+      name: newUser.name,
+      avatarUrl: newUser.avatarUrl,
+    },
+  }
+}
+
+export async function loginUser(
+  email: string,
+  password: string,
+  jwtSecret: string,
+): Promise<LoginResponse> {
+  const user = await getUserByEmail(email)
+  if (!user) {
+    throw new Error('Invalid email or password')
+  }
+
+  const valid = await comparePassword(password, user.passwordHash)
+  if (!valid) {
+    throw new Error('Invalid email or password')
+  }
 
   const token = await signToken({ sub: user.id, email: user.email }, jwtSecret)
 
   return {
     token,
-    user: { id: user.id, email: user.email, name: user.name },
+    user: {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      avatarUrl: user.avatarUrl,
+    },
   }
 }
