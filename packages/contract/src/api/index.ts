@@ -1,4 +1,4 @@
-import type { User, MoodEntry } from '../models/index.js'
+import type { MoodEntry } from '../models/index.js'
 
 // Generic API response wrapper
 export interface ApiResponse<T> {
@@ -12,22 +12,8 @@ export interface ApiError {
   statusCode: number
 }
 
-// Auth
-export interface LoginRequest {
-  email: string
-  password: string
-}
-
-export interface LoginResponse {
-  token: string
-  user: Omit<User, 'createdAt' | 'updatedAt'>
-}
-
-export interface RegisterRequest {
-  email: string
-  password: string
-  name: string
-}
+// OAuth
+export type * from './oauth.js'
 
 // Mood
 export interface CreateMoodEntryRequest {
