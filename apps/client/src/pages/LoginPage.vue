@@ -1,20 +1,29 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { BaseButton, BaseCard } from '@mental-health/design-system'
-import { getOAuthAuthorizeUrl } from '../services/api'
+import { postLogin } from '../services/api'
+import { useAuth } from '../composables/useAuth'
 
-const loading = ref<string | null>(null)
+const router = useRouter()
+const { setAuth } = useAuth()
+
+const email = ref('')
+const password = ref('')
+const loading = ref(false)
 const error = ref<string | null>(null)
 
-async function loginWith(provider: 'google' | 'apple' | 'facebook') {
-  loading.value = provider
+async function handleLogin() {
+  loading.value = true
   error.value = null
   try {
-    const { url } = await getOAuthAuthorizeUrl(provider)
-    window.location.href = url
+    const result = await postLogin(email.value, password.value)
+    setAuth(result.token, result.user)
+    await router.replace('/')
   } catch (e) {
-    error.value = e instanceof Error ? e.message : 'Failed to start login'
-    loading.value = null
+    error.value = e instanceof Error ? e.message : 'Login failed'
+  } finally {
+    loading.value = false
   }
 }
 </script>
@@ -22,42 +31,36 @@ async function loginWith(provider: 'google' | 'apple' | 'facebook') {
 <template>
   <main class="min-h-screen flex items-center justify-center p-4">
     <BaseCard title="Sign in to Mindly" class="w-full max-w-sm">
-      <div class="flex flex-col gap-3">
-        <p class="text-muted-foreground text-sm">
-          Choose a provider to sign in or create an account.
-        </p>
+      <form class="flex flex-col gap-3" @submit.prevent="handleLogin">
+        <p class="text-muted-foreground text-sm">Enter your email and password to sign in.</p>
 
         <div v-if="error" class="text-sm text-red-600 bg-red-50 p-2 rounded">
           {{ error }}
         </div>
 
-        <BaseButton
-          variant="outline"
-          :loading="loading === 'google'"
-          :disabled="loading !== null"
-          @click="loginWith('google')"
-        >
-          Continue with Google
-        </BaseButton>
+        <input
+          v-model="email"
+          type="email"
+          placeholder="Email"
+          required
+          class="border rounded px-3 py-2 text-sm"
+        />
 
-        <BaseButton
-          variant="outline"
-          :loading="loading === 'apple'"
-          :disabled="loading !== null"
-          @click="loginWith('apple')"
-        >
-          Continue with Apple
-        </BaseButton>
+        <input
+          v-model="password"
+          type="password"
+          placeholder="Password"
+          required
+          class="border rounded px-3 py-2 text-sm"
+        />
 
-        <BaseButton
-          variant="outline"
-          :loading="loading === 'facebook'"
-          :disabled="loading !== null"
-          @click="loginWith('facebook')"
-        >
-          Continue with Facebook
-        </BaseButton>
-      </div>
+        <BaseButton type="submit" :loading="loading" :disabled="loading"> Sign in </BaseButton>
+
+        <p class="text-sm text-center text-muted-foreground">
+          Don't have an account?
+          <router-link to="/signup" class="text-primary underline">Sign up</router-link>
+        </p>
+      </form>
     </BaseCard>
   </main>
 </template>

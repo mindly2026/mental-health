@@ -1,4 +1,4 @@
-import type { OAuthAuthorizeResponse, OAuthLoginResponse } from '@mental-health/contract'
+import type { LoginResponse } from '@mental-health/contract'
 import { useAuth } from '../composables/useAuth'
 
 const API_BASE = (import.meta.env['VITE_API_URL'] as string | undefined) ?? 'http://localhost:3000'
@@ -25,31 +25,22 @@ async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> 
   return res.json() as Promise<T>
 }
 
-export async function getOAuthAuthorizeUrl(provider: string): Promise<OAuthAuthorizeResponse> {
-  const res = await apiFetch<ApiResponse<OAuthAuthorizeResponse>>(
-    `/auth/oauth/${provider}/authorize`,
-  )
-  return res.data
-}
-
-export async function postOAuthCallback(
-  provider: string,
-  body: { code: string; state: string; user?: unknown },
-): Promise<OAuthLoginResponse> {
-  const res = await apiFetch<ApiResponse<OAuthLoginResponse>>(`/auth/oauth/${provider}/callback`, {
+export async function postLogin(email: string, password: string): Promise<LoginResponse> {
+  const res = await apiFetch<ApiResponse<LoginResponse>>('/auth/login', {
     method: 'POST',
-    body: JSON.stringify(body),
+    body: JSON.stringify({ email, password }),
   })
   return res.data
 }
 
-export async function postOAuthToken(
-  provider: string,
-  body: { token: string; name?: string },
-): Promise<OAuthLoginResponse> {
-  const res = await apiFetch<ApiResponse<OAuthLoginResponse>>(`/auth/oauth/${provider}/token`, {
+export async function postRegister(
+  email: string,
+  password: string,
+  name: string,
+): Promise<LoginResponse> {
+  const res = await apiFetch<ApiResponse<LoginResponse>>('/auth/register', {
     method: 'POST',
-    body: JSON.stringify(body),
+    body: JSON.stringify({ email, password, name }),
   })
   return res.data
 }

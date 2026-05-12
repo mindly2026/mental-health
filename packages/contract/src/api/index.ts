@@ -12,8 +12,22 @@ export interface ApiError {
   statusCode: number
 }
 
-// OAuth
-export type * from './oauth.js'
+// Auth
+export interface LoginRequest {
+  email: string
+  password: string
+}
+
+export interface RegisterRequest {
+  email: string
+  password: string
+  name: string
+}
+
+export interface LoginResponse {
+  token: string
+  user: { id: string; email: string; name: string; avatarUrl: string | null }
+}
 
 // Mood
 export interface CreateMoodEntryRequest {

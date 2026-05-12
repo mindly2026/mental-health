@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuth } from '../composables/useAuth'
 import LoginPage from '../pages/LoginPage.vue'
-import OAuthCallbackPage from '../pages/OAuthCallbackPage.vue'
+import SignupPage from '../pages/SignupPage.vue'
 import DashboardPage from '../pages/DashboardPage.vue'
 
 const router = createRouter({
@@ -14,9 +14,9 @@ const router = createRouter({
       meta: { public: true },
     },
     {
-      path: '/auth/callback/:provider',
-      name: 'oauth-callback',
-      component: OAuthCallbackPage,
+      path: '/signup',
+      name: 'signup',
+      component: SignupPage,
       meta: { public: true },
     },
     {
