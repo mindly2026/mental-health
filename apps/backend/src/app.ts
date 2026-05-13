@@ -4,6 +4,8 @@ import jwt from '@fastify/jwt'
 import { healthRoutes } from './routes/health.js'
 import { authRoutes } from './routes/auth.js'
 import { moodRoutes } from './routes/mood.js'
+import { clinicRoutes } from './routes/clinics.js'
+import { appointmentRoutes } from './routes/appointments.js'
 
 export async function buildApp() {
   const app = Fastify({
@@ -26,6 +28,8 @@ export async function buildApp() {
   await app.register(healthRoutes)
   await app.register(authRoutes, { prefix: '/auth' })
   await app.register(moodRoutes, { prefix: '/mood' })
+  await app.register(clinicRoutes, { prefix: '/clinics' })
+  await app.register(appointmentRoutes, { prefix: '/appointments' })
 
   return app
 }

@@ -1,9 +1,10 @@
 import { reactive, readonly } from 'vue'
 
-interface AuthUser {
+export interface AuthUser {
   id: string
   email: string
   name: string
+  role: 'customer' | 'clinic'
   avatarUrl: string | null
 }
 

@@ -9,7 +9,7 @@ export async function signToken(
   expiresIn = '7d',
 ): Promise<string> {
   const key = textEncoder.encode(secret)
-  return new SignJWT({ sub: payload.sub, email: payload.email })
+  return new SignJWT({ sub: payload.sub, email: payload.email, role: payload.role })
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime(expiresIn)

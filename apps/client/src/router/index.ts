@@ -3,6 +3,10 @@ import { useAuth } from '../composables/useAuth'
 import LoginPage from '../pages/LoginPage.vue'
 import SignupPage from '../pages/SignupPage.vue'
 import DashboardPage from '../pages/DashboardPage.vue'
+import CalendarPage from '../pages/CalendarPage.vue'
+import ClinicsPage from '../pages/ClinicsPage.vue'
+import ClinicDetailPage from '../pages/ClinicDetailPage.vue'
+import AvailabilityPage from '../pages/AvailabilityPage.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -23,6 +27,26 @@ const router = createRouter({
       path: '/',
       name: 'dashboard',
       component: DashboardPage,
+    },
+    {
+      path: '/calendar',
+      name: 'calendar',
+      component: CalendarPage,
+    },
+    {
+      path: '/clinics',
+      name: 'clinics',
+      component: ClinicsPage,
+    },
+    {
+      path: '/clinics/:id',
+      name: 'clinic-detail',
+      component: ClinicDetailPage,
+    },
+    {
+      path: '/availability',
+      name: 'availability',
+      component: AvailabilityPage,
     },
   ],
 })
