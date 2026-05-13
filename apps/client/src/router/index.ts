@@ -2,15 +2,22 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useAuth } from '../composables/useAuth'
 import LoginPage from '../pages/LoginPage.vue'
 import SignupPage from '../pages/SignupPage.vue'
+import SetupAccountPage from '../pages/SetupAccountPage.vue'
+import ClinicSelectPage from '../pages/ClinicSelectPage.vue'
 import DashboardPage from '../pages/DashboardPage.vue'
 import CalendarPage from '../pages/CalendarPage.vue'
 import ClinicsPage from '../pages/ClinicsPage.vue'
 import ClinicDetailPage from '../pages/ClinicDetailPage.vue'
 import AvailabilityPage from '../pages/AvailabilityPage.vue'
+import DepartmentsPage from '../pages/DepartmentsPage.vue'
+import MembersPage from '../pages/MembersPage.vue'
+import DoctorAppointmentsPage from '../pages/DoctorAppointmentsPage.vue'
+import StaffAppointmentsPage from '../pages/StaffAppointmentsPage.vue'
 
 const router = createRouter({
   history: createWebHistory(),
   routes: [
+    // ─── Public ───────────────────────────────────────────────────
     {
       path: '/login',
       name: 'login',
@@ -24,10 +31,25 @@ const router = createRouter({
       meta: { public: true },
     },
     {
+      path: '/setup-account',
+      name: 'setup-account',
+      component: SetupAccountPage,
+      meta: { public: true },
+    },
+
+    // ─── Common ───────────────────────────────────────────────────
+    {
       path: '/',
       name: 'dashboard',
       component: DashboardPage,
     },
+    {
+      path: '/select-clinic',
+      name: 'select-clinic',
+      component: ClinicSelectPage,
+    },
+
+    // ─── Customer ─────────────────────────────────────────────────
     {
       path: '/calendar',
       name: 'calendar',
@@ -43,10 +65,36 @@ const router = createRouter({
       name: 'clinic-detail',
       component: ClinicDetailPage,
     },
+
+    // ─── Clinic owner ─────────────────────────────────────────────
     {
       path: '/availability',
       name: 'availability',
       component: AvailabilityPage,
+    },
+    {
+      path: '/departments',
+      name: 'departments',
+      component: DepartmentsPage,
+    },
+    {
+      path: '/members',
+      name: 'members',
+      component: MembersPage,
+    },
+
+    // ─── Doctor ───────────────────────────────────────────────────
+    {
+      path: '/doctor/appointments',
+      name: 'doctor-appointments',
+      component: DoctorAppointmentsPage,
+    },
+
+    // ─── Staff ────────────────────────────────────────────────────
+    {
+      path: '/staff/appointments',
+      name: 'staff-appointments',
+      component: StaffAppointmentsPage,
     },
   ],
 })

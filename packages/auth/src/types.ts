@@ -1,7 +1,7 @@
 export interface JwtPayload {
   sub: string // user ID
   email: string
-  role: 'customer' | 'clinic'
+  role: 'customer' | 'clinic' | 'doctor' | 'staff'
   iat?: number | undefined
   exp?: number | undefined
 }

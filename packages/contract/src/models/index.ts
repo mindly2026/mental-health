@@ -2,7 +2,7 @@ export interface User {
   id: string
   email: string
   name: string
-  role: 'customer' | 'clinic'
+  role: 'customer' | 'clinic' | 'doctor' | 'staff'
   avatarUrl: string | null
   createdAt: Date
   updatedAt: Date
@@ -35,10 +35,48 @@ export interface ClinicAvailability {
   endTime: string // HH:MM
 }
 
+export interface Department {
+  id: string
+  clinicId: string
+  name: string
+  description: string | null
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface ClinicMember {
+  id: string
+  clinicId: string
+  userId: string
+  role: 'doctor' | 'staff'
+  departmentId: string | null
+  status: 'pending' | 'active' | 'suspended'
+  invitedBy: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface ClinicMemberWithUser extends ClinicMember {
+  userName: string
+  userEmail: string
+  departmentName: string | null
+}
+
+export interface ClinicWithMembership {
+  clinicId: string
+  clinicName: string
+  memberRole: 'doctor' | 'staff'
+  departmentId: string | null
+  departmentName: string | null
+  memberStatus: 'pending' | 'active' | 'suspended'
+}
+
 export interface Appointment {
   id: string
   clinicId: string
   customerId: string
+  doctorId: string | null
+  departmentId: string | null
   date: string // YYYY-MM-DD
   startTime: string // HH:MM
   endTime: string // HH:MM
