@@ -18,6 +18,7 @@ export async function registerUser(
   password: string,
   name: string,
   jwtSecret: string,
+  role: 'customer' | 'clinic' = 'customer',
 ): Promise<LoginResponse> {
   const existing = await getUserByEmail(email)
   if (existing) {
@@ -26,11 +27,14 @@ export async function registerUser(
 
   const passwordHash = await hashPassword(password)
 
-  const [newUser] = await db.insert(users).values({ email, name, passwordHash }).returning()
+  const [newUser] = await db.insert(users).values({ email, name, passwordHash, role }).returning()
 
   if (!newUser) throw new Error('Failed to create user')
 
-  const token = await signToken({ sub: newUser.id, email: newUser.email }, jwtSecret)
+  const token = await signToken(
+    { sub: newUser.id, email: newUser.email, role: newUser.role },
+    jwtSecret,
+  )
 
   return {
     token,
@@ -38,6 +42,7 @@ export async function registerUser(
       id: newUser.id,
       email: newUser.email,
       name: newUser.name,
+      role: newUser.role,
       avatarUrl: newUser.avatarUrl,
     },
   }
@@ -58,7 +63,7 @@ export async function loginUser(
     throw new Error('Invalid email or password')
   }
 
-  const token = await signToken({ sub: user.id, email: user.email }, jwtSecret)
+  const token = await signToken({ sub: user.id, email: user.email, role: user.role }, jwtSecret)
 
   return {
     token,
@@ -66,6 +71,7 @@ export async function loginUser(
       id: user.id,
       email: user.email,
       name: user.name,
+      role: user.role,
       avatarUrl: user.avatarUrl,
     },
   }

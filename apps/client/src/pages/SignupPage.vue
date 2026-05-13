@@ -11,6 +11,7 @@ const { setAuth } = useAuth()
 const name = ref('')
 const email = ref('')
 const password = ref('')
+const role = ref<'customer' | 'clinic'>('customer')
 const loading = ref(false)
 const error = ref<string | null>(null)
 
@@ -18,7 +19,7 @@ async function handleSignup() {
   loading.value = true
   error.value = null
   try {
-    const result = await postRegister(email.value, password.value, name.value)
+    const result = await postRegister(email.value, password.value, name.value, role.value)
     setAuth(result.token, result.user)
     await router.replace('/')
   } catch (e) {
@@ -30,10 +31,45 @@ async function handleSignup() {
 </script>
 
 <template>
-  <main class="min-h-screen flex items-center justify-center p-4">
+  <main class="min-h-screen flex items-center justify-center p-4 bg-gray-50">
     <BaseCard title="Create an account" class="w-full max-w-sm">
-      <form class="flex flex-col gap-3" @submit.prevent="handleSignup">
-        <p class="text-muted-foreground text-sm">Fill in your details to create an account.</p>
+      <form class="flex flex-col gap-4" @submit.prevent="handleSignup">
+        <p class="text-muted-foreground text-sm">Fill in your details to get started.</p>
+
+        <!-- Role selector -->
+        <div class="flex rounded-lg border overflow-hidden">
+          <button
+            type="button"
+            :class="[
+              'flex-1 py-2.5 text-sm font-medium transition-colors',
+              role === 'customer'
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-white text-muted-foreground hover:bg-gray-50',
+            ]"
+            @click="role = 'customer'"
+          >
+            Patient / Customer
+          </button>
+          <button
+            type="button"
+            :class="[
+              'flex-1 py-2.5 text-sm font-medium transition-colors',
+              role === 'clinic'
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-white text-muted-foreground hover:bg-gray-50',
+            ]"
+            @click="role = 'clinic'"
+          >
+            Clinic / Provider
+          </button>
+        </div>
+
+        <p v-if="role === 'customer'" class="text-xs text-muted-foreground -mt-1">
+          Book appointments at mental health clinics.
+        </p>
+        <p v-else class="text-xs text-muted-foreground -mt-1">
+          Manage your clinic, set availability, and see patient appointments.
+        </p>
 
         <div v-if="error" class="text-sm text-red-600 bg-red-50 p-2 rounded">
           {{ error }}
@@ -42,7 +78,7 @@ async function handleSignup() {
         <input
           v-model="name"
           type="text"
-          placeholder="Name"
+          :placeholder="role === 'clinic' ? 'Your name (clinic owner)' : 'Full name'"
           required
           class="border rounded px-3 py-2 text-sm"
         />
@@ -63,7 +99,9 @@ async function handleSignup() {
           class="border rounded px-3 py-2 text-sm"
         />
 
-        <BaseButton type="submit" :loading="loading" :disabled="loading"> Sign up </BaseButton>
+        <BaseButton type="submit" :loading="loading" :disabled="loading">
+          Create {{ role === 'clinic' ? 'Clinic' : 'Customer' }} Account
+        </BaseButton>
 
         <p class="text-sm text-center text-muted-foreground">
           Already have an account?

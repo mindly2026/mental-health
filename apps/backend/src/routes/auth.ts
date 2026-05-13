@@ -8,14 +8,14 @@ function getJwtSecret(): string {
 
 export async function authRoutes(app: FastifyInstance) {
   app.post<{ Body: RegisterRequest }>('/register', async (request, reply) => {
-    const { email, password, name } = request.body
+    const { email, password, name, role } = request.body
 
     if (!email || !password || !name) {
       return reply.status(400).send({ error: 'Email, password, and name are required' })
     }
 
     try {
-      const result = await registerUser(email, password, name, getJwtSecret())
+      const result = await registerUser(email, password, name, getJwtSecret(), role ?? 'customer')
       return reply.status(201).send({ data: result })
     } catch (e) {
       const message = e instanceof Error ? e.message : 'Registration failed'

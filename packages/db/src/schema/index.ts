@@ -1,2 +1,5 @@
 export * from './users'
 export * from './mood-entries'
+export * from './clinics'
+export * from './clinic-availability'
+export * from './appointments'
