@@ -97,6 +97,25 @@ async function handleRemove(memberId: string) {
   }
 }
 
+async function handleDepartmentChange(member: ClinicMemberWithUser, deptId: string) {
+  if (!clinicId.value) return
+  const newDeptId = deptId || null
+  try {
+    const updated = await updateMember(clinicId.value, member.id, { departmentId: newDeptId })
+    const idx = members.value.findIndex((m) => m.id === member.id)
+    if (idx !== -1) {
+      const dept = departments.value.find((d) => d.id === newDeptId)
+      members.value[idx] = {
+        ...members.value[idx]!,
+        ...updated,
+        departmentName: dept?.name ?? null,
+      }
+    }
+  } catch (e) {
+    saveError.value = e instanceof Error ? e.message : 'Failed to update department'
+  }
+}
+
 function statusColor(status: string) {
   if (status === 'active') return 'bg-green-100 text-green-700'
   if (status === 'pending') return 'bg-yellow-100 text-yellow-700'
@@ -270,9 +289,18 @@ function roleColor(role: string) {
               </span>
             </div>
             <p class="text-xs text-gray-400 truncate mt-0.5">{{ member.userEmail }}</p>
-            <p v-if="member.departmentName" class="text-xs text-gray-400 mt-0.5">
-              {{ member.departmentName }}
-            </p>
+            <div v-if="departments.length > 0" class="mt-1.5">
+              <select
+                :value="member.departmentId ?? ''"
+                class="text-xs border rounded px-2 py-1 text-gray-600 bg-white w-full max-w-[180px]"
+                @change="handleDepartmentChange(member, ($event.target as HTMLSelectElement).value)"
+              >
+                <option value="">No department</option>
+                <option v-for="dept in departments" :key="dept.id" :value="dept.id">
+                  {{ dept.name }}
+                </option>
+              </select>
+            </div>
             <p v-if="member.status === 'pending'" class="text-xs text-yellow-600 mt-1">
               Waiting for account setup
             </p>

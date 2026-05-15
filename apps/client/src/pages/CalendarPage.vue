@@ -519,6 +519,14 @@ onMounted(async () => {
               <span class="text-gray-500">Patient:</span>
               <span class="ml-2 font-medium">{{ selectedAppt.customerName }}</span>
             </div>
+            <div v-if="selectedAppt.doctorName">
+              <span class="text-gray-500">Doctor:</span>
+              <span class="ml-2 font-medium">{{ selectedAppt.doctorName }}</span>
+            </div>
+            <div v-if="selectedAppt.departmentName">
+              <span class="text-gray-500">Department:</span>
+              <span class="ml-2 font-medium">{{ selectedAppt.departmentName }}</span>
+            </div>
             <div>
               <span class="text-gray-500">Date:</span>
               <span class="ml-2 font-medium">{{ selectedAppt.date }}</span>

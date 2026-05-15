@@ -10,6 +10,7 @@ import { memberRoutes } from './routes/members.js'
 import { appointmentRoutes } from './routes/appointments.js'
 import { doctorRoutes } from './routes/doctor.js'
 import { staffRoutes } from './routes/staff.js'
+import { searchRoutes } from './routes/search.js'
 
 export async function buildApp() {
   const app = Fastify({
@@ -38,6 +39,7 @@ export async function buildApp() {
   await app.register(appointmentRoutes, { prefix: '/appointments' })
   await app.register(doctorRoutes, { prefix: '/doctor' })
   await app.register(staffRoutes, { prefix: '/staff' })
+  await app.register(searchRoutes)
 
   return app
 }

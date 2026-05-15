@@ -1,16 +1,37 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import type { Clinic, ClinicAvailability } from '@mental-health/contract'
-import { getClinic, getClinicAvailability, bookAppointment } from '../services/api'
+import type {
+  Clinic,
+  ClinicAvailability,
+  DoctorAvailability,
+  Department,
+  DoctorPublicInfo,
+} from '@mental-health/contract'
+import {
+  getClinic,
+  getClinicAvailability,
+  bookAppointment,
+  getDepartments,
+  getClinicDoctors,
+  getDoctorMemberAvailability,
+} from '../services/api'
 
 const router = useRouter()
 const route = useRoute()
 const clinicId = route.params['id'] as string
 
 const clinic = ref<Clinic | null>(null)
-const availability = ref<ClinicAvailability[]>([])
+const clinicAvailability = ref<ClinicAvailability[]>([])
+const availability = ref<ClinicAvailability[] | DoctorAvailability[]>([])
+const departments = ref<Department[]>([])
+const doctors = ref<DoctorPublicInfo[]>([])
+const selectedDepartmentId = ref<string | null>(null)
+const selectedDoctorId = ref<string | null>(null)
 const loading = ref(true)
+const loadError = ref<string | null>(null)
+const departmentSelectionMade = ref(false)
+const doctorSelectionMade = ref(false)
 const booking = ref(false)
 const bookingError = ref<string | null>(null)
 const bookingSuccess = ref(false)
@@ -120,6 +141,9 @@ function selectDate(date: Date) {
   if (!hasAvailability(date)) return
   selectedDate.value = toDateStr(date)
   selectedSlot.value = null
+  // If dept/doctor were pre-selected (e.g. via query params), treat those steps as done
+  departmentSelectionMade.value = selectedDepartmentId.value !== null
+  doctorSelectionMade.value = selectedDoctorId.value !== null
 }
 
 const selectedDateSlots = computed(() => {
@@ -128,6 +152,71 @@ const selectedDateSlots = computed(() => {
   return slotsForDate(d)
 })
 
+const selectedDoctor = computed(
+  () => doctors.value.find((d) => d.userId === selectedDoctorId.value) ?? null,
+)
+
+const selectedDepartment = computed(
+  () => departments.value.find((d) => d.id === selectedDepartmentId.value) ?? null,
+)
+
+const showDepartmentStep = computed(
+  () => selectedDate.value !== null && departments.value.length > 0,
+)
+
+const showDoctorStep = computed(() => {
+  if (!selectedDate.value) return false
+  if (departments.value.length > 0 && !departmentSelectionMade.value) return false
+  return doctors.value.length > 0
+})
+
+const showTimeSlots = computed(() => {
+  if (!selectedDate.value) return false
+  if (showDepartmentStep.value && !departmentSelectionMade.value) return false
+  if (showDoctorStep.value && !doctorSelectionMade.value) return false
+  return true
+})
+
+async function selectDepartment(deptId: string | null) {
+  selectedDepartmentId.value = deptId
+  departmentSelectionMade.value = true
+  selectedDoctorId.value = null
+  doctorSelectionMade.value = false
+  selectedSlot.value = null
+  availability.value = clinicAvailability.value
+  doctors.value = []
+  try {
+    doctors.value = deptId
+      ? await getClinicDoctors(clinicId, deptId)
+      : await getClinicDoctors(clinicId)
+  } catch {
+    doctors.value = []
+  }
+}
+
+async function selectDoctor(doc: DoctorPublicInfo | null) {
+  doctorSelectionMade.value = true
+  selectedSlot.value = null
+
+  if (doc === null || selectedDoctorId.value === doc.userId) {
+    selectedDoctorId.value = null
+    availability.value = clinicAvailability.value
+    return
+  }
+
+  selectedDoctorId.value = doc.userId
+  if (doc.departmentId) {
+    selectedDepartmentId.value = doc.departmentId
+  }
+
+  try {
+    const doctorAvail = await getDoctorMemberAvailability(clinicId, doc.memberId)
+    availability.value = doctorAvail.length > 0 ? doctorAvail : clinicAvailability.value
+  } catch {
+    availability.value = clinicAvailability.value
+  }
+}
+
 async function handleBook() {
   if (!selectedDate.value || !selectedSlot.value) return
   booking.value = true
@@ -135,6 +224,8 @@ async function handleBook() {
   try {
     await bookAppointment({
       clinicId,
+      doctorId: selectedDoctorId.value ?? undefined,
+      departmentId: selectedDepartmentId.value ?? undefined,
       date: selectedDate.value,
       startTime: selectedSlot.value.start,
       endTime: selectedSlot.value.end,
@@ -148,16 +239,49 @@ async function handleBook() {
   }
 }
 
+function getInitial(name: string): string {
+  return name.trim()[0]?.toUpperCase() ?? '?'
+}
+
 onMounted(async () => {
+  // Critical: clinic info + availability — without these, booking is impossible
   try {
     const [c, avail] = await Promise.all([getClinic(clinicId), getClinicAvailability(clinicId)])
     clinic.value = c
+    clinicAvailability.value = avail
     availability.value = avail
   } catch {
-    // handle error
-  } finally {
+    loadError.value = 'Failed to load clinic information. Please refresh.'
     loading.value = false
+    return
   }
+
+  // Non-critical: departments + doctors — each fetched independently so one failure
+  // cannot silently block the other from loading
+  const [deptsResult, docsResult] = await Promise.allSettled([
+    getDepartments(clinicId),
+    getClinicDoctors(clinicId),
+  ])
+  if (deptsResult.status === 'fulfilled') departments.value = deptsResult.value
+  if (docsResult.status === 'fulfilled') doctors.value = docsResult.value
+
+  // Pre-select from query params
+  try {
+    const queryDoctorId = route.query['doctorId'] as string | undefined
+    const queryDeptId = route.query['deptId'] as string | undefined
+
+    if (queryDoctorId) {
+      const match = doctors.value.find((d) => d.userId === queryDoctorId)
+      if (match) await selectDoctor(match)
+    } else if (queryDeptId) {
+      selectedDepartmentId.value = queryDeptId
+      doctors.value = await getClinicDoctors(clinicId, queryDeptId)
+    }
+  } catch {
+    // pre-selection failure is non-fatal
+  }
+
+  loading.value = false
 })
 </script>
 
@@ -196,10 +320,16 @@ onMounted(async () => {
         </svg>
       </div>
       <h2 class="text-xl font-semibold text-gray-800 mb-2">Appointment Booked!</h2>
-      <p class="text-gray-500 mb-4">
+      <p class="text-gray-500 mb-1">
         Your appointment at {{ clinic?.name }} on {{ selectedDate }} from
         {{ selectedSlot ? formatTime(selectedSlot.start) : '' }} to
         {{ selectedSlot ? formatTime(selectedSlot.end) : '' }} has been booked.
+      </p>
+      <p v-if="selectedDoctor" class="text-gray-500 mb-1">
+        Doctor: <span class="font-medium">{{ selectedDoctor.name }}</span>
+      </p>
+      <p v-if="selectedDepartment" class="text-gray-500 mb-4">
+        Department: <span class="font-medium">{{ selectedDepartment.name }}</span>
       </p>
       <button
         class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
@@ -207,6 +337,10 @@ onMounted(async () => {
       >
         View in Calendar
       </button>
+    </div>
+
+    <div v-else-if="loadError" class="max-w-md mx-auto p-6 mt-8 text-center text-red-500">
+      {{ loadError }}
     </div>
 
     <div v-else class="max-w-2xl mx-auto p-4 flex flex-col gap-4">
@@ -316,8 +450,91 @@ onMounted(async () => {
         </div>
       </div>
 
-      <!-- Time slots for selected date -->
-      <div v-if="selectedDate" class="bg-white rounded-xl border p-4">
+      <!-- Step 2: Department selection -->
+      <div v-if="showDepartmentStep" class="bg-white rounded-xl border p-4">
+        <h3 class="font-medium text-gray-700 text-sm mb-3">Select Department</h3>
+        <div class="flex flex-wrap gap-2">
+          <button
+            :class="[
+              'px-3 py-1.5 rounded-full text-sm border transition-colors',
+              selectedDepartmentId === null && departmentSelectionMade
+                ? 'bg-blue-600 text-white border-blue-600'
+                : 'text-gray-600 border-gray-200 hover:bg-gray-50',
+            ]"
+            @click="selectDepartment(null)"
+          >
+            Any
+          </button>
+          <button
+            v-for="dept in departments"
+            :key="dept.id"
+            :class="[
+              'px-3 py-1.5 rounded-full text-sm border transition-colors',
+              selectedDepartmentId === dept.id
+                ? 'bg-blue-600 text-white border-blue-600'
+                : 'text-gray-600 border-gray-200 hover:bg-gray-50',
+            ]"
+            @click="selectDepartment(dept.id)"
+          >
+            {{ dept.name }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 3: Doctor selection -->
+      <div v-if="showDoctorStep" class="bg-white rounded-xl border p-4">
+        <h3 class="font-medium text-gray-700 text-sm mb-3">Select Doctor</h3>
+        <div class="flex flex-wrap gap-2">
+          <button
+            :class="[
+              'flex items-center gap-2 px-3 py-2 rounded-lg border text-sm transition-colors',
+              selectedDoctorId === null && doctorSelectionMade
+                ? 'bg-blue-600 text-white border-blue-600'
+                : 'text-gray-600 border-gray-200 hover:bg-gray-50',
+            ]"
+            @click="selectDoctor(null)"
+          >
+            Any Available
+          </button>
+          <button
+            v-for="doc in doctors"
+            :key="doc.userId"
+            :class="[
+              'flex items-center gap-2 px-3 py-2 rounded-lg border text-sm transition-colors',
+              selectedDoctorId === doc.userId
+                ? 'bg-blue-600 text-white border-blue-600'
+                : 'text-gray-600 border-gray-200 hover:bg-gray-50',
+            ]"
+            @click="selectDoctor(doc)"
+          >
+            <span
+              :class="[
+                'w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold shrink-0',
+                selectedDoctorId === doc.userId
+                  ? 'bg-white text-blue-600'
+                  : 'bg-blue-100 text-blue-700',
+              ]"
+            >
+              {{ getInitial(doc.name) }}
+            </span>
+            <span>{{ doc.name }}</span>
+            <span
+              v-if="doc.departmentName"
+              :class="[
+                'text-xs px-1.5 py-0.5 rounded-full',
+                selectedDoctorId === doc.userId
+                  ? 'bg-white/20 text-white'
+                  : 'bg-gray-100 text-gray-500',
+              ]"
+            >
+              {{ doc.departmentName }}
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 4: Time slots -->
+      <div v-if="showTimeSlots" class="bg-white rounded-xl border p-4">
         <h3 class="font-medium text-gray-800 mb-3">Available times for {{ selectedDate }}</h3>
         <div v-if="selectedDateSlots.length === 0" class="text-sm text-gray-400">
           No slots available for this day.
@@ -347,6 +564,12 @@ onMounted(async () => {
           <p>
             <span class="font-medium">Time:</span> {{ formatTime(selectedSlot.start) }} –
             {{ formatTime(selectedSlot.end) }}
+          </p>
+          <p v-if="selectedDoctor">
+            <span class="font-medium">Doctor:</span> {{ selectedDoctor.name }}
+          </p>
+          <p v-if="selectedDepartment">
+            <span class="font-medium">Department:</span> {{ selectedDepartment.name }}
           </p>
         </div>
         <textarea

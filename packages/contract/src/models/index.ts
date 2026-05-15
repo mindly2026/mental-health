@@ -35,6 +35,14 @@ export interface ClinicAvailability {
   endTime: string // HH:MM
 }
 
+export interface DoctorAvailability {
+  id: string
+  memberId: string
+  dayOfWeek: number // 0 = Sunday, 6 = Saturday
+  startTime: string // HH:MM
+  endTime: string // HH:MM
+}
+
 export interface Department {
   id: string
   clinicId: string
@@ -69,6 +77,33 @@ export interface ClinicWithMembership {
   departmentId: string | null
   departmentName: string | null
   memberStatus: 'pending' | 'active' | 'suspended'
+}
+
+export interface DoctorPublicInfo {
+  userId: string
+  name: string
+  memberId: string
+  departmentId: string | null
+  departmentName: string | null
+}
+
+export interface DoctorSearchResult {
+  userId: string
+  name: string
+  clinics: Array<{
+    clinicId: string
+    clinicName: string
+    memberId: string
+    departmentId: string | null
+    departmentName: string | null
+  }>
+}
+
+export interface DepartmentSearchResult {
+  departmentId: string
+  name: string
+  clinicId: string
+  clinicName: string
 }
 
 export interface Appointment {

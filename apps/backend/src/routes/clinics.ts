@@ -8,6 +8,8 @@ import {
   setClinicAvailability,
   getClinicAvailability,
   getClinicAppointments,
+  getActiveDoctorsByClinic,
+  getDoctorAvailability,
 } from '@mental-health/domain'
 
 type JwtUser = { sub: string; role: string }
@@ -82,6 +84,30 @@ export async function clinicRoutes(app: FastifyInstance) {
       }
       const slots = await setClinicAvailability(request.params.id, request.body)
       return reply.send({ data: slots })
+    },
+  )
+
+  // Public: get active doctors for a clinic
+  app.get<{ Params: { clinicId: string } }>('/:clinicId/doctors', async (request, reply) => {
+    const doctors = await getActiveDoctorsByClinic(request.params.clinicId)
+    return reply.send({ data: doctors })
+  })
+
+  // Public: get a doctor's availability (used by booking UI)
+  app.get<{ Params: { clinicId: string; memberId: string } }>(
+    '/:clinicId/doctors/:memberId/availability',
+    async (request, reply) => {
+      const slots = await getDoctorAvailability(request.params.memberId)
+      return reply.send({ data: slots })
+    },
+  )
+
+  // Public: get active doctors for a clinic filtered by department
+  app.get<{ Params: { clinicId: string; deptId: string } }>(
+    '/:clinicId/departments/:deptId/doctors',
+    async (request, reply) => {
+      const doctors = await getActiveDoctorsByClinic(request.params.clinicId, request.params.deptId)
+      return reply.send({ data: doctors })
     },
   )
 

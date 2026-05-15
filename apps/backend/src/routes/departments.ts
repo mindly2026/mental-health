@@ -6,7 +6,6 @@ import {
   updateDepartment,
   deleteDepartment,
   getClinicByUserId,
-  getMembersByUserId,
 } from '@mental-health/domain'
 
 type JwtUser = { sub: string; role: string }
@@ -19,36 +18,12 @@ async function requireAuth(request: FastifyRequest, reply: FastifyReply) {
   }
 }
 
-// Resolve the clinic from the request: clinic owners use their own clinic,
-// doctors/staff check membership.
-async function resolveClinic(clinicId: string, user: JwtUser) {
-  if (user.role === 'clinic') {
-    const clinic = await getClinicByUserId(user.sub)
-    if (!clinic || clinic.id !== clinicId) return null
-    return clinic
-  }
-  if (user.role === 'doctor' || user.role === 'staff') {
-    const memberships = await getMembersByUserId(user.sub)
-    const match = memberships.find((m) => m.member.clinicId === clinicId)
-    return match ? { id: clinicId } : null
-  }
-  return null
-}
-
 export async function departmentRoutes(app: FastifyInstance) {
-  // List departments for a clinic
-  app.get<{ Params: { clinicId: string } }>(
-    '/:clinicId/departments',
-    { onRequest: [requireAuth] },
-    async (request, reply) => {
-      const user = request.user as JwtUser
-      const clinic = await resolveClinic(request.params.clinicId, user)
-      if (!clinic) return reply.status(403).send({ error: 'Not authorized for this clinic' })
-
-      const depts = await getDepartmentsByClinicId(request.params.clinicId)
-      return reply.send({ data: depts })
-    },
-  )
+  // Public: list departments for a clinic (needed by clients when booking)
+  app.get<{ Params: { clinicId: string } }>('/:clinicId/departments', async (request, reply) => {
+    const depts = await getDepartmentsByClinicId(request.params.clinicId)
+    return reply.send({ data: depts })
+  })
 
   // Create a department (clinic owner only)
   app.post<{ Params: { clinicId: string }; Body: CreateDepartmentRequest }>(
