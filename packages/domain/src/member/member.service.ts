@@ -5,6 +5,7 @@ import type {
   InviteMemberRequest,
   UpdateMemberRequest,
   ClinicMemberWithUser,
+  DoctorPublicInfo,
 } from '@mental-health/contract'
 
 export async function inviteMember(
@@ -106,6 +107,40 @@ export async function getClinicMembers(
     userName,
     userEmail,
     departmentName: departmentName ?? null,
+  }))
+}
+
+export async function getActiveDoctorsByClinic(
+  clinicId: string,
+  departmentId?: string,
+): Promise<DoctorPublicInfo[]> {
+  const conditions = [
+    eq(clinicMembers.clinicId, clinicId),
+    eq(clinicMembers.role, 'doctor'),
+    eq(clinicMembers.status, 'active'),
+    ...(departmentId ? [eq(clinicMembers.departmentId, departmentId)] : []),
+  ]
+
+  const rows = await db
+    .select({
+      userId: users.id,
+      name: users.name,
+      memberId: clinicMembers.id,
+      departmentId: clinicMembers.departmentId,
+      departmentName: departments.name,
+    })
+    .from(clinicMembers)
+    .innerJoin(users, eq(clinicMembers.userId, users.id))
+    .leftJoin(departments, eq(clinicMembers.departmentId, departments.id))
+    .where(and(...conditions))
+    .orderBy(users.name)
+
+  return rows.map((r) => ({
+    userId: r.userId,
+    name: r.name,
+    memberId: r.memberId,
+    departmentId: r.departmentId ?? null,
+    departmentName: r.departmentName ?? null,
   }))
 }
 

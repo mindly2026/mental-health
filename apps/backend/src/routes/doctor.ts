@@ -1,5 +1,11 @@
 import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
-import { getDoctorAppointments, getMembersByUserId } from '@mental-health/domain'
+import {
+  getDoctorAppointments,
+  getMembersByUserId,
+  getDoctorAvailability,
+  setDoctorAvailability,
+} from '@mental-health/domain'
+import type { SetDoctorAvailabilityRequest } from '@mental-health/contract'
 
 type JwtUser = { sub: string; role: string }
 
@@ -40,4 +46,46 @@ export async function doctorRoutes(app: FastifyInstance) {
     const appts = await getDoctorAppointments(user.sub, clinicId)
     return reply.send({ data: appts })
   })
+
+  // Get doctor's own availability for a clinic
+  app.get<{ Querystring: { clinicId: string } }>('/availability', async (request, reply) => {
+    const user = request.user as JwtUser
+    const { clinicId } = request.query
+    if (!clinicId) return reply.status(400).send({ error: 'clinicId is required' })
+
+    // Find the member record for this doctor+clinic pair
+    const memberships = await getMembersByUserId(user.sub)
+    const membership = memberships.find((m) => m.member.clinicId === clinicId)
+    if (!membership) return reply.status(404).send({ error: 'Not a member of this clinic' })
+
+    const slots = await getDoctorAvailability(membership.member.id)
+    return reply.send({ data: slots })
+  })
+
+  // Set doctor's own availability for a clinic
+  app.put<{ Querystring: { clinicId: string }; Body: SetDoctorAvailabilityRequest }>(
+    '/availability',
+    async (request, reply) => {
+      const user = request.user as JwtUser
+      const { clinicId } = request.query
+      if (!clinicId) return reply.status(400).send({ error: 'clinicId is required' })
+
+      const memberships = await getMembersByUserId(user.sub)
+      const membership = memberships.find((m) => m.member.clinicId === clinicId)
+      if (!membership) return reply.status(404).send({ error: 'Not a member of this clinic' })
+
+      try {
+        const slots = await setDoctorAvailability(
+          membership.member.id,
+          user.sub,
+          clinicId,
+          request.body.slots,
+        )
+        return reply.send({ data: slots })
+      } catch (e) {
+        const message = e instanceof Error ? e.message : 'Failed to save availability'
+        return reply.status(400).send({ error: message })
+      }
+    },
+  )
 }

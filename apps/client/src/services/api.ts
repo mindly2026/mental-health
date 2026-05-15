@@ -2,6 +2,7 @@ import type {
   LoginResponse,
   Clinic,
   ClinicAvailability,
+  DoctorAvailability,
   AppointmentWithDetails,
   SetAvailabilityRequest,
   BookAppointmentRequest,
@@ -15,6 +16,9 @@ import type {
   InviteMemberRequest,
   UpdateMemberRequest,
   ClinicWithMembership,
+  DoctorPublicInfo,
+  SearchType,
+  SearchResponse,
 } from '@mental-health/contract'
 import { useAuth } from '../composables/useAuth'
 
@@ -229,6 +233,37 @@ export async function getDoctorAppointments(clinicId?: string): Promise<Appointm
   return res.data
 }
 
+export async function getDoctorAvailability(clinicId: string): Promise<DoctorAvailability[]> {
+  const res = await apiFetch<ApiResponse<DoctorAvailability[]>>(
+    `/doctor/availability?clinicId=${encodeURIComponent(clinicId)}`,
+  )
+  return res.data
+}
+
+export async function setDoctorAvailability(
+  clinicId: string,
+  input: SetAvailabilityRequest,
+): Promise<DoctorAvailability[]> {
+  const res = await apiFetch<ApiResponse<DoctorAvailability[]>>(
+    `/doctor/availability?clinicId=${encodeURIComponent(clinicId)}`,
+    {
+      method: 'PUT',
+      body: JSON.stringify(input),
+    },
+  )
+  return res.data
+}
+
+export async function getDoctorMemberAvailability(
+  clinicId: string,
+  memberId: string,
+): Promise<DoctorAvailability[]> {
+  const res = await apiFetch<ApiResponse<DoctorAvailability[]>>(
+    `/clinics/${clinicId}/doctors/${memberId}/availability`,
+  )
+  return res.data
+}
+
 // ─── Staff portal ─────────────────────────────────────────────────────────────
 
 export async function getStaffClinics(): Promise<ClinicWithMembership[]> {
@@ -239,6 +274,26 @@ export async function getStaffClinics(): Promise<ClinicWithMembership[]> {
 export async function getStaffAppointments(clinicId: string): Promise<AppointmentWithDetails[]> {
   const res = await apiFetch<ApiResponse<AppointmentWithDetails[]>>(
     `/staff/clinics/${clinicId}/appointments`,
+  )
+  return res.data
+}
+
+// ─── Search ───────────────────────────────────────────────────────────────────
+
+export async function getClinicDoctors(
+  clinicId: string,
+  deptId?: string,
+): Promise<DoctorPublicInfo[]> {
+  const path = deptId
+    ? `/clinics/${clinicId}/departments/${deptId}/doctors`
+    : `/clinics/${clinicId}/doctors`
+  const res = await apiFetch<ApiResponse<DoctorPublicInfo[]>>(path)
+  return res.data
+}
+
+export async function search(type: SearchType, q: string): Promise<SearchResponse> {
+  const res = await apiFetch<ApiResponse<SearchResponse>>(
+    `/search?type=${encodeURIComponent(type)}&q=${encodeURIComponent(q)}`,
   )
   return res.data
 }

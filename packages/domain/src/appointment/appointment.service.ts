@@ -1,7 +1,10 @@
 import { and, eq } from 'drizzle-orm'
+import { alias } from 'drizzle-orm/pg-core'
 import { db, appointments, clinics, users, departments } from '@mental-health/db'
 import type { NewAppointment } from '@mental-health/db'
 import type { AppointmentWithDetails, BookAppointmentRequest } from '@mental-health/contract'
+
+const doctorUsers = alias(users, 'doctor_users')
 
 export async function bookAppointment(
   customerId: string,
@@ -39,19 +42,22 @@ export async function getClinicAppointments(clinicId: string): Promise<Appointme
       customerName: users.name,
       clinicName: clinics.name,
       departmentName: departments.name,
+      doctorName: doctorUsers.name,
     })
     .from(appointments)
     .leftJoin(users, eq(appointments.customerId, users.id))
     .leftJoin(clinics, eq(appointments.clinicId, clinics.id))
     .leftJoin(departments, eq(appointments.departmentId, departments.id))
+    .leftJoin(doctorUsers, eq(appointments.doctorId, doctorUsers.id))
     .where(eq(appointments.clinicId, clinicId))
     .orderBy(appointments.date, appointments.startTime)
 
-  return rows.map(({ appointment, customerName, clinicName, departmentName }) => ({
+  return rows.map(({ appointment, customerName, clinicName, departmentName, doctorName }) => ({
     ...appointment,
     customerName: customerName ?? undefined,
     clinicName: clinicName ?? undefined,
     departmentName: departmentName ?? undefined,
+    doctorName: doctorName ?? undefined,
   }))
 }
 
@@ -63,17 +69,20 @@ export async function getCustomerAppointments(
       appointment: appointments,
       clinicName: clinics.name,
       departmentName: departments.name,
+      doctorName: doctorUsers.name,
     })
     .from(appointments)
     .leftJoin(clinics, eq(appointments.clinicId, clinics.id))
     .leftJoin(departments, eq(appointments.departmentId, departments.id))
+    .leftJoin(doctorUsers, eq(appointments.doctorId, doctorUsers.id))
     .where(eq(appointments.customerId, customerId))
     .orderBy(appointments.date, appointments.startTime)
 
-  return rows.map(({ appointment, clinicName, departmentName }) => ({
+  return rows.map(({ appointment, clinicName, departmentName, doctorName }) => ({
     ...appointment,
     clinicName: clinicName ?? undefined,
     departmentName: departmentName ?? undefined,
+    doctorName: doctorName ?? undefined,
   }))
 }
 
@@ -91,19 +100,22 @@ export async function getDoctorAppointments(
       clinicName: clinics.name,
       customerName: users.name,
       departmentName: departments.name,
+      doctorName: doctorUsers.name,
     })
     .from(appointments)
     .leftJoin(clinics, eq(appointments.clinicId, clinics.id))
     .leftJoin(users, eq(appointments.customerId, users.id))
     .leftJoin(departments, eq(appointments.departmentId, departments.id))
+    .leftJoin(doctorUsers, eq(appointments.doctorId, doctorUsers.id))
     .where(condition)
     .orderBy(appointments.date, appointments.startTime)
 
-  return rows.map(({ appointment, clinicName, customerName, departmentName }) => ({
+  return rows.map(({ appointment, clinicName, customerName, departmentName, doctorName }) => ({
     ...appointment,
     clinicName: clinicName ?? undefined,
     customerName: customerName ?? undefined,
     departmentName: departmentName ?? undefined,
+    doctorName: doctorName ?? undefined,
   }))
 }
 

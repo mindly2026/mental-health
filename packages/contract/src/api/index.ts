@@ -2,11 +2,14 @@ import type {
   MoodEntry,
   Clinic,
   ClinicAvailability,
+  DoctorAvailability,
   Appointment,
   Department,
   ClinicMember,
   ClinicMemberWithUser,
   ClinicWithMembership,
+  DoctorSearchResult,
+  DepartmentSearchResult,
 } from '../models/index.js'
 
 // Generic API response wrapper
@@ -100,6 +103,9 @@ export interface SetAvailabilityRequest {
 
 export type AvailabilityResponse = ApiResponse<ClinicAvailability[]>
 
+export type SetDoctorAvailabilityRequest = SetAvailabilityRequest
+export type DoctorAvailabilityResponse = ApiResponse<DoctorAvailability[]>
+
 // ─── Departments ──────────────────────────────────────────────────────────────
 
 export interface CreateDepartmentRequest {
@@ -132,6 +138,17 @@ export interface UpdateMemberRequest {
 
 export type ClinicMemberResponse = ApiResponse<ClinicMember>
 export type ClinicMembersResponse = ApiResponse<ClinicMemberWithUser[]>
+
+// ─── Search ───────────────────────────────────────────────────────────────────
+
+export type SearchType = 'clinic' | 'doctor' | 'department'
+
+export interface SearchResponse {
+  type: SearchType
+  clinics?: Clinic[]
+  doctors?: DoctorSearchResult[]
+  departments?: DepartmentSearchResult[]
+}
 
 // ─── Appointments ─────────────────────────────────────────────────────────────
 

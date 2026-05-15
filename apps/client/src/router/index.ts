@@ -12,6 +12,7 @@ import AvailabilityPage from '../pages/AvailabilityPage.vue'
 import DepartmentsPage from '../pages/DepartmentsPage.vue'
 import MembersPage from '../pages/MembersPage.vue'
 import DoctorAppointmentsPage from '../pages/DoctorAppointmentsPage.vue'
+import DoctorAvailabilityPage from '../pages/DoctorAvailabilityPage.vue'
 import StaffAppointmentsPage from '../pages/StaffAppointmentsPage.vue'
 
 const router = createRouter({
@@ -65,6 +66,11 @@ const router = createRouter({
       name: 'clinic-detail',
       component: ClinicDetailPage,
     },
+    {
+      path: '/search',
+      name: 'search',
+      component: () => import('../pages/SearchPage.vue'),
+    },
 
     // ─── Clinic owner ─────────────────────────────────────────────
     {
@@ -88,6 +94,11 @@ const router = createRouter({
       path: '/doctor/appointments',
       name: 'doctor-appointments',
       component: DoctorAppointmentsPage,
+    },
+    {
+      path: '/doctor/availability',
+      name: 'doctor-availability',
+      component: DoctorAvailabilityPage,
     },
 
     // ─── Staff ────────────────────────────────────────────────────
