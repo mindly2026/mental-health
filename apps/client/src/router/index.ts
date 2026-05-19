@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuth } from '../composables/useAuth'
+import AuthLayout from '../layouts/AuthLayout.vue'
 import LoginPage from '../pages/LoginPage.vue'
 import SignupPage from '../pages/SignupPage.vue'
 import SetupAccountPage from '../pages/SetupAccountPage.vue'
@@ -38,74 +39,81 @@ const router = createRouter({
       meta: { public: true },
     },
 
-    // ─── Common ───────────────────────────────────────────────────
+    // ─── Authenticated (with left nav sidebar) ────────────────────
     {
       path: '/',
-      name: 'dashboard',
-      component: DashboardPage,
-    },
-    {
-      path: '/select-clinic',
-      name: 'select-clinic',
-      component: ClinicSelectPage,
-    },
+      component: AuthLayout,
+      children: [
+        // ─── Common ─────────────────────────────────────────────
+        {
+          path: '',
+          name: 'dashboard',
+          component: DashboardPage,
+        },
+        {
+          path: 'select-clinic',
+          name: 'select-clinic',
+          component: ClinicSelectPage,
+        },
 
-    // ─── Customer ─────────────────────────────────────────────────
-    {
-      path: '/calendar',
-      name: 'calendar',
-      component: CalendarPage,
-    },
-    {
-      path: '/clinics',
-      name: 'clinics',
-      component: ClinicsPage,
-    },
-    {
-      path: '/clinics/:id',
-      name: 'clinic-detail',
-      component: ClinicDetailPage,
-    },
-    {
-      path: '/search',
-      name: 'search',
-      component: () => import('../pages/SearchPage.vue'),
-    },
+        // ─── Customer ───────────────────────────────────────────
+        {
+          path: 'calendar',
+          name: 'calendar',
+          component: CalendarPage,
+        },
+        {
+          path: 'clinics',
+          name: 'clinics',
+          component: ClinicsPage,
+        },
+        {
+          path: 'clinics/:id',
+          name: 'clinic-detail',
+          component: ClinicDetailPage,
+        },
+        {
+          path: 'search',
+          name: 'search',
+          component: () => import('../pages/SearchPage.vue'),
+        },
 
-    // ─── Clinic owner ─────────────────────────────────────────────
-    {
-      path: '/availability',
-      name: 'availability',
-      component: AvailabilityPage,
-    },
-    {
-      path: '/departments',
-      name: 'departments',
-      component: DepartmentsPage,
-    },
-    {
-      path: '/members',
-      name: 'members',
-      component: MembersPage,
-    },
+        // ─── Clinic owner ────────────────────────────────────────
+        {
+          path: 'availability',
+          name: 'availability',
+          component: AvailabilityPage,
+        },
+        {
+          path: 'departments',
+          name: 'departments',
+          component: DepartmentsPage,
+        },
+        {
+          path: 'members',
+          name: 'members',
+          component: MembersPage,
+        },
 
-    // ─── Doctor ───────────────────────────────────────────────────
-    {
-      path: '/doctor/appointments',
-      name: 'doctor-appointments',
-      component: DoctorAppointmentsPage,
-    },
-    {
-      path: '/doctor/availability',
-      name: 'doctor-availability',
-      component: DoctorAvailabilityPage,
-    },
+        // ─── Doctor ──────────────────────────────────────────────
+        {
+          path: 'doctor/appointments',
+          name: 'doctor-appointments',
+          component: DoctorAppointmentsPage,
+        },
+        {
+          path: 'doctor/availability',
+          name: 'doctor-availability',
+          component: DoctorAvailabilityPage,
+        },
 
-    // ─── Staff ────────────────────────────────────────────────────
-    {
-      path: '/staff/appointments',
-      name: 'staff-appointments',
-      component: StaffAppointmentsPage,
+        // ─── Staff ───────────────────────────────────────────────
+        {
+          path: 'staff/appointments',
+          name: 'staff-appointments',
+          component: StaffAppointmentsPage,
+        },
+      ],
     },
   ],
 })

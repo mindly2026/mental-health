@@ -4,7 +4,7 @@ import { MdAvatar } from '@mental-health/design-system'
 import { useAuth } from '../composables/useAuth'
 
 const router = useRouter()
-const { state, logout } = useAuth()
+const { state } = useAuth()
 
 function getInitials(name: string): string {
   return name
@@ -13,11 +13,6 @@ function getInitials(name: string): string {
     .join('')
     .toUpperCase()
     .slice(0, 2)
-}
-
-function handleLogout() {
-  logout()
-  void router.replace('/login')
 }
 
 function roleBadgeClass(role: string) {
@@ -51,17 +46,6 @@ function handleSwitchClinic() {
 
 <template>
   <div class="min-h-screen bg-gray-50">
-    <!-- Header -->
-    <header class="bg-white border-b px-4 py-3 flex items-center justify-between">
-      <h1 class="text-lg font-semibold text-gray-800">Mindly</h1>
-      <button
-        class="text-sm text-gray-500 hover:text-gray-800 transition-colors"
-        @click="handleLogout"
-      >
-        Sign out
-      </button>
-    </header>
-
     <div class="max-w-md mx-auto p-4 flex flex-col gap-4 pt-6">
       <!-- User card -->
       <div class="bg-white rounded-xl border p-4 flex items-center gap-3">
